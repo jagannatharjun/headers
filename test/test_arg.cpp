@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <cstring>
 #include <gupta/arg.hpp>
 
 bool operator==(const std::string &s, const std::string_view &v) {
@@ -21,7 +22,7 @@ int main() {
   try {
     const char *arg[] = {"exe", "--insert", "hello ad", "---equal=123", "a"};
     auto p = gupta::OptParser(sizeof arg / sizeof arg[0], arg,
-                              {{"insert", "equal"}});  
+                              {{"insert", "equal"}});
     assert(0 && "shouldn't reached here");
   } catch (std::invalid_argument &e) {
   } catch (...) {

@@ -1,22 +1,18 @@
 #ifndef GUPTA_FORMAT_HPP
 #define GUPTA_FORMAT_HPP
 
+#include <cstdio>
 #include <string>
 #include <tuple>
-#include <cstdio>
 #include <type_traits>
 
 namespace gupta {
 
 using std::to_string;
 
-static std::string to_string(std::string s) {
-	return s;
-}
+static std::string to_string(std::string s) { return s; }
 
-static std::string to_string(const char * s) {
-	return s;
-}
+static std::string to_string(const char *s) { return s; }
 
 template <std::size_t static_index, typename... ArgumentTypes>
 std::string runtime_get(std::size_t runtime_index,
@@ -26,12 +22,13 @@ std::string runtime_get(std::size_t runtime_index,
         "number of format symbols is more than arguments");
   } else {
     if (runtime_index == static_index) {
-		if constexpr (std::is_same<decltype(std::get<static_index>(rest)),std::string>::value) {
-			return std::get<static_index>(rest);
-		} else { 
-			return to_string(std::get<static_index>(rest));
-		}
-	} else
+      if constexpr (std::is_same<decltype(std::get<static_index>(rest)),
+                                 std::string>::value) {
+        return std::get<static_index>(rest);
+      } else {
+        return to_string(std::get<static_index>(rest));
+      }
+    } else
       return to_string(
           runtime_get<static_index - 1>(runtime_index, std::move(rest)));
   }
@@ -58,12 +55,16 @@ std::string format(const char *str, const Ts &... args) {
   return res;
 }
 
-
 namespace detail {
 
-class _stdout_object {};
-class _stderr_object {};
-class _endl_type {};
+struct _stdout_object {};
+struct _stderr_object {
+  _stderr_object() = default;
+  _stderr_object(const _stderr_object &) = default;
+  _stderr_object &operator=(const _stderr_object &) = default;
+  ~_stderr_object() { std::fprintf(stderr, "\n"); }
+};
+struct _endl_type {};
 
 static std::string to_string(_endl_type) { return "\n"; }
 
@@ -84,18 +85,20 @@ template <typename... Ts> inline auto print(const char *str, Ts &&... args) {
 }
 
 template <typename... Ts> inline auto debug(const char *str, Ts &&... args) {
-  return fprint(stderr, str, std::forward<Ts>(args)...);
+  return fprint(stderr, str, std::forward<Ts>(args)...) && fprint(stderr, "\n");
 }
 
 template <typename T>
-detail::_stdout_object operator<<(detail::_stdout_object f, const T &arg) {
+detail::_stdout_object operator<<(const detail::_stdout_object &f,
+                                  const T &arg) {
   auto s = to_string(arg);
   fwrite(s.data(), 1, s.size(), stdout);
   return f;
 }
 
 template <typename T>
-detail::_stderr_object operator<<(detail::_stderr_object f, const T &arg) {
+const detail::_stderr_object &operator<<(const detail::_stderr_object &f,
+                                         const T &arg) {
   auto s = to_string(arg);
   fwrite(s.data(), 1, s.size(), stderr);
   return f;

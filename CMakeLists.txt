@@ -15,3 +15,5 @@ add_executable(arg_test test/test_arg.cpp)
 set_property(TARGET arg_test PROPERTY CXX_STANDARD 17)
 
 add_executable(buffer_stream_test test/test_buffer_stream.cpp)
+
+add_executable(ini_test include/gupta/ini.hpp test/test_ini.cpp)
