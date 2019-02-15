@@ -1,4 +1,5 @@
 #include <cassert>
+#include <fstream>
 #include <gupta/ini.hpp>
 #include <vector>
 
@@ -54,6 +55,5 @@ int main() {
     assert(i["Section2"]["K[e]y"] == "V[alue]");
     assert(i["Section2"]["k[e]y"] == "V[alue]");
   }
-
   puts("passed");
 }

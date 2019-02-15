@@ -13,9 +13,9 @@ namespace gupta {
 namespace {
 
 void trim(std::string &s) {
-  while (s.front() == ' ' || s.front() == '\r' || s.front() == '\n')
+  while (s.size() > 0 && (s.front() == ' ' || s.front() == '\r' || s.front() == '\n'))
     s.replace(0, 1, "");
-  while (s.back() == ' ' || s.back() == '\r' || s.back() == '\n') {
+  while (s.size() > 0 && (s.back() == ' ' || s.back() == '\r' || s.back() == '\n')) {
     s.pop_back();
   }
 }
