@@ -2,9 +2,8 @@
 #define DLL_HPP
 
 #include <gupta/format_io.hpp>
-#include <memory>
+#include <gupta/windows.hpp>
 #include <type_traits>
-#include <windows.h>
 
 namespace gupta {
 
@@ -25,7 +24,7 @@ public:
     } else {
       gupta::debug("Not supported CharT: %\n", typeid(CharT).name());
     }
-    if (1 || !module_) {
+    if (!module_) {
       lastError_ = ::GetLastError();
     }
   }
