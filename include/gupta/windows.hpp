@@ -6,12 +6,11 @@
 #include <Windows.h>
 #include <string>
 
+namespace gupta {
 
 //Returns the last Win32 error, in string format. Returns an empty string if there is no error.
-static std::string GetLastErrorAsString()
+static std::string GetLastErrorAsString(DWORD errorMessageID = ::GetLastError())
 {
-    //Get the error message, if any.
-    DWORD errorMessageID = ::GetLastError();
     if(errorMessageID == 0)
         return std::string(); //No error message has been recorded
 
@@ -27,5 +26,6 @@ static std::string GetLastErrorAsString()
     return message;
 }
 
+}
 
 #endif
