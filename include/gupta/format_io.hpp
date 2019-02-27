@@ -114,5 +114,7 @@ using namespace printing_shortcuts;
 } // namespace gupta
 
 using namespace gupta::printing_shortcuts;
+#define SHOW(X)                                                                \
+  gupta::debug("%:%:%: % = %", __FILE__, __func__, __LINE__, #X, X);
 
 #endif

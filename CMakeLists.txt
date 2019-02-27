@@ -3,6 +3,14 @@ cmake_minimum_required(VERSION 3.11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories(./include/)
 
+#find_program(CLANG_CL name "clang-cl.exe" HINTS ENV "PATH")
+#if (CLANG_CL)
+#    message(STATUS "found clang-cl at ${CLANG_CL}")
+#    set(CMAKE_CXX_COMPILER "${CLANG_CL}")
+#else()
+#    message(STATUS "can't find ${CLANG_CL}")
+#endif()
+
 ##add_executable(file_test test/test_file.cpp)
 ##target_link_libraries(file_test gfile)
 
@@ -17,3 +25,9 @@ set_property(TARGET arg_test PROPERTY CXX_STANDARD 17)
 add_executable(buffer_stream_test test/test_buffer_stream.cpp)
 
 add_executable(ini_test include/gupta/ini.hpp test/test_ini.cpp)
+
+add_executable(dll_test include/gupta/dll.hpp test/test_dll.cpp)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(helloDll SHARED test/helloDll.cpp)
+##set_property(TARGET helloDll PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set_property(TARGET dll_test PROPERTY CXX_STANDARD 17)
