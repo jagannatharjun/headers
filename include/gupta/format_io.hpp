@@ -10,9 +10,9 @@ namespace gupta {
 
 using std::to_string;
 
-static std::string to_string(std::string s) { return s; }
+static inline std::string to_string(std::string s) { return s; }
 
-static std::string to_string(const char *s) { return s; }
+static inline std::string to_string(const char *s) { return s; }
 
 template <std::size_t static_index, typename... ArgumentTypes>
 std::string runtime_get(std::size_t runtime_index,
@@ -70,9 +70,10 @@ static std::string to_string(_endl_type) { return "\n"; }
 
 } // namespace detail
 
-namespace printing_shortcuts {
 
 static detail::_endl_type endl;
+
+namespace printing_shortcuts {
 
 template <typename... Ts>
 auto fprint(std::FILE *f, const char *str, Ts &&... args) {
@@ -104,8 +105,8 @@ const detail::_stderr_object &operator<<(const detail::_stderr_object &f,
   return f;
 }
 
-static detail::_stdout_object print() { return {}; }
-static detail::_stderr_object debug() { return {}; }
+static inline detail::_stdout_object print() { return {}; }
+static inline detail::_stderr_object debug() { return {}; }
 
 } // namespace printing_shortcuts
 

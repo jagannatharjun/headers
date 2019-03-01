@@ -26,6 +26,20 @@ static std::string GetLastErrorAsString(DWORD errorMessageID = ::GetLastError())
     return message;
 }
 
+class WinLastError {
+public:
+    WinLastError(int l = 0) { lastError_ = l; }
+    WinLastError& operator =(int l) { lastError_ = l; return *this; }
+    auto lastError() { return lastError_; }
+    auto msg() { return GetLastErrorAsString(lastError_); }
+private:
+    int lastError_ = 0;
+};
+
+std::string to_string(WinLastError e) {
+    return e.msg();
+}
+
 }
 
 #endif

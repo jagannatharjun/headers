@@ -16,11 +16,11 @@ public:
   DynamicLib(const DynamicLib &) = delete;
   DynamicLib &operator=(const DynamicLib &) = delete;
   template <typename CharT>
-  DynamicLib(const CharT *dllName) : module_{NULL}, lastError_{0} {
+  DynamicLib(const CharT *dllName) : module_{NULL} {
     if constexpr (std::is_same<CharT, char>::value) {
       module_ = LoadLibraryA(dllName);
     } else if constexpr (std::is_same<CharT, wchar_t>::value) {
-      module_ = LoadLibrary(dllName);
+      module_ = LoadLibraryW(dllName);
     } else {
       gupta::debug("Not supported CharT: %\n", typeid(CharT).name());
     }
@@ -38,7 +38,7 @@ public:
 
 private:
   HMODULE module_;
-  int lastError_;
+  gupta::WinLastError lastError_;
 }; // namespace gupta
 
 template <typename> class DllFunction;
@@ -48,7 +48,7 @@ class DllFunction<ReturnType(Args...)> {
 public:
   friend class detail::testDllFunction;
   using function_type = ReturnType(__stdcall *)(Args...);
-  DllFunction(DynamicLib &dll, const char *function_name) : LastError_{0} {
+  DllFunction(DynamicLib &dll, const char *function_name)  {
     if (!(FPtr_ = (function_type)(GetProcAddress(dll.module(), function_name))))
       LastError_ = GetLastError();
   }
@@ -59,7 +59,7 @@ public:
 
 private:
   function_type FPtr_;
-  int LastError_;
+  gupta::WinLastError LastError_;
 };
 
 } // namespace gupta
