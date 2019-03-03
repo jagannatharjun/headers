@@ -55,7 +55,7 @@ public:
   ReturnType operator()(Args &&... args) {
     return FPtr_(std::forward<Args>(args)...);
   }
-  int lastError() { return LastError_; }
+  auto lastError() { return LastError_; }
 
 private:
   function_type FPtr_;
