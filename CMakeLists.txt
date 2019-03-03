@@ -6,6 +6,8 @@ include_directories(./include/)
 ##add_executable(file_test test/test_file.cpp)
 ##target_link_libraries(file_test gfile)
 
+add_executable(cleanup_test test/test_cleanup.cpp include/gupta/cleanup.hpp)
+
 add_executable(podvector_test test/test_podvector.cpp)
 
 add_executable(format_io_test test/test_format_io.cpp)
