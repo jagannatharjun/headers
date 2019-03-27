@@ -14,6 +14,12 @@ static inline std::string to_string(std::string s) { return s; }
 
 static inline std::string to_string(const char *s) { return s; }
 
+template <typename T>
+auto to_string(const T& s) -> decltype (s.string()) { return s.string(); }
+
+static inline std::string to_string(const void *ptr) { return std::to_string((uintmax_t)ptr); }
+
+
 template <std::size_t static_index, typename... ArgumentTypes>
 std::string runtime_get(std::size_t runtime_index,
                         std::tuple<ArgumentTypes...> &&rest) {

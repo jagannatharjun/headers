@@ -145,7 +145,7 @@ private:
 		*r = *first;
 	}
   }
-  static constexpr size_type max(size_type a,size_type b) {
+  constexpr size_type max(size_type a,size_type b) {
 	  return a>b?a:b;
   }
 };  
