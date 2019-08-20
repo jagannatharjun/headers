@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <stdexcept>
 
 namespace gupta {
 

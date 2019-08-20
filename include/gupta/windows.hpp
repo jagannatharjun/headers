@@ -5,20 +5,24 @@
 
 #include <Windows.h>
 #include <gupta/format_io.hpp>
+#include <stdexcept>
 #include <string>
 
 namespace gupta {
 
-// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
-static std::string GetLastErrorAsString(DWORD errorMessageID = ::GetLastError()) {
+// Returns the last Win32 error, in string format. Returns an empty string if
+// there is no error.
+static std::string
+GetLastErrorAsString(DWORD errorMessageID = ::GetLastError()) {
   if (errorMessageID == 0)
     return std::string(); // No error message has been recorded
 
   LPSTR messageBuffer = nullptr;
-  size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                                   FORMAT_MESSAGE_IGNORE_INSERTS,
-                               NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                               (LPSTR)&messageBuffer, 0, NULL);
+  size_t size = FormatMessageA(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPSTR)&messageBuffer, 0, NULL);
 
   std::string message(messageBuffer, size);
 
@@ -30,7 +34,7 @@ static std::string GetLastErrorAsString(DWORD errorMessageID = ::GetLastError())
 
 class WinLastError {
 public:
-  WinLastError(int l = 0) { lastError_ = l; }
+  WinLastError(int l = ::GetLastError()) { lastError_ = l; }
   WinLastError &operator=(int l) {
     lastError_ = l;
     return *this;
@@ -40,6 +44,16 @@ public:
 
 private:
   int lastError_ = 0;
+};
+
+class WinException : public std::exception {
+public:
+  WinException(int l = ::GetLastError()) : Error_(GetLastErrorAsString()) {}
+  const char *what() const noexcept override { return Error_.c_str(); }
+  virtual ~WinException() {}
+
+private:
+  std::string Error_;
 };
 
 class WinHandle {
@@ -60,11 +74,14 @@ public:
 
   explicit operator bool() const { return value_ != INVALID_HANDLE_VALUE; }
   operator HANDLE() const { return value_; }
-
-  ~WinHandle() {
+  PHANDLE underlying_handle() { return &value_; }
+  void close() {
     if (value_ != INVALID_HANDLE_VALUE)
       CloseHandle(value_);
+    value_ = INVALID_HANDLE_VALUE;
   }
+
+  ~WinHandle() { close(); }
 };
 
 static inline std::string to_string(WinLastError e) { return e.msg(); }
@@ -87,7 +104,7 @@ struct Semaphore {
     // debug("wait completed");
   }
   void unlock() {
-   // debug("unlocked %", Name_);
+    // debug("unlocked %", Name_);
     if (!ReleaseSemaphore(hSemaphore_, 1, NULL))
       debug("ReleaseSemaphore failed: %", GetLastErrorAsString());
     else {
@@ -104,7 +121,8 @@ private:
       debug("% semaphore already exists", Name_);
       return false;
     } else if (hSemaphore_ == INVALID_HANDLE_VALUE) {
-      debug("CreateSemaphore(%) failed: %", Name_, gupta::GetLastErrorAsString());
+      debug("CreateSemaphore(%) failed: %", Name_,
+            gupta::GetLastErrorAsString());
       return false;
     }
     debug("created semaphore % with handle %", Name_, hSemaphore_);
@@ -112,9 +130,11 @@ private:
   }
 
   bool _open() {
-    hSemaphore_ = OpenSemaphoreA(SYNCHRONIZE | SEMAPHORE_MODIFY_STATE, false, Name_.c_str());
+    hSemaphore_ = OpenSemaphoreA(SYNCHRONIZE | SEMAPHORE_MODIFY_STATE, false,
+                                 Name_.c_str());
     if (hSemaphore_ == INVALID_HANDLE_VALUE) {
-      debug("failed to open handle - \"%\": %", Name_, gupta::GetLastErrorAsString());
+      debug("failed to open handle - \"%\": %", Name_,
+            gupta::GetLastErrorAsString());
       return false;
     }
     debug("opened semaphore % with handle %", Name_, hSemaphore_);
@@ -137,8 +157,8 @@ struct SharedMemory {
       return 0;
     }
     Name_ = std::move(Name);
-    hMapFile_ =
-        CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, 1024, Name_.c_str());
+    hMapFile_ = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
+                                   0, 1024, Name_.c_str());
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
       debug("Shared Memory \"%\" Already exists", Name_);
       return 0;
@@ -175,12 +195,15 @@ struct SharedMemory {
       return 0;
     }
 
-    BufPtr_ = (LPTSTR)MapViewOfFile(hMapFile_,           // handle to map object
-                                    FILE_MAP_ALL_ACCESS, // read/write permission
-                                    0, 0, BufSize_);
+    BufPtr_ =
+        (LPTSTR)MapViewOfFile(hMapFile_,           // handle to map object
+                              FILE_MAP_ALL_ACCESS, // read/write permission
+                              0, 0, BufSize_);
     if (BufPtr_ == NULL) {
       debug("Could not map view of file: %", gupta::GetLastErrorAsString());
       return 0;
+    } else {
+      debug("BufPtr = %", BufPtr_);
     }
 
     debug("succeffully opened: %", Name_);

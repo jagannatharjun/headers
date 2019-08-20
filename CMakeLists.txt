@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
+project(HEADERS CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include_directories(./include/)
@@ -25,3 +26,5 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(helloDll SHARED test/helloDll.cpp)
 ##set_property(TARGET helloDll PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set_property(TARGET dll_test PROPERTY CXX_STANDARD 17)
+
+add_executable(test_test include/gupta/test.hpp test/test_test.cpp)
