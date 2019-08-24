@@ -6,6 +6,8 @@
 #include <tuple>
 #include <type_traits>
 #include <stdexcept>
+#include <locale>
+#include <codecvt>
 
 namespace gupta {
 
@@ -17,6 +19,10 @@ static inline std::string to_string(const char *s) { return s; }
 
 template <typename T>
 auto to_string(const T& s) -> decltype (s.string()) { return s.string(); }
+
+std::string to_string(const std::wstring& s) {
+    return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(s);
+}
 
 static inline std::string to_string(const void *ptr) { return std::to_string((uintmax_t)ptr); }
 
